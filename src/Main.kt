@@ -19,8 +19,11 @@ fun main() {
     if (sudoku.isSolvable()) {
         val solution = sudoku.solve()
         var counter = 0
-        for (state in solution)
-            println("Step $counter: \n\n$state")
+        if (solution.size > 0) {
+            for (state in solution)
+                println("Step $counter: \n\n$state")
+        }
+        else println("The algorithm didn't find a solution for the sudoku.")
     }
     else
         println("The sudoku inserted is unsolvable.")

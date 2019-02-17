@@ -1,13 +1,17 @@
 import kotlin.collections.ArrayList
+import kotlin.math.exp
 import kotlin.math.pow
 
 class Sudoku(squares: Int, initialString: String) {
 
     private val numMax: Int = squares.toFloat().pow(2).toInt()
     private val initialState: State
+    val frontier = HashMap<Int, State>()
+    val explored = HashMap<Int, State>()
 
     init {
         this.initialState = State(setInitialState(initialString), null, 0)
+        frontier[this.initialState.id] = this.initialState
     }
 
     private fun setInitialState(string: String): Array<IntArray> {
@@ -24,6 +28,26 @@ class Sudoku(squares: Int, initialString: String) {
 
     fun isSolvable() = this.initialState.isSolvable()
 
-    fun solve() = this.initialState.solve()
+    fun solve(): ArrayList<State> {
+        val count = 0
+        while (frontier.size > 0) {
+            val sortedFrontier = frontier.toList().sortedBy { it.second.heuristic() + it.second.pathCost }
+            val selected = sortedFrontier[0].second
+            explored[selected.id] = selected
 
+            if (selected.goalTest()) {
+                selected.insertToSolution()
+                return State.solution
+            }
+            else {
+                for (child in selected.returnChildren()) {
+                    if (explored[child.id] == null){
+                        frontier[child.id] = child
+                    }
+                }
+                frontier.remove(selected.id)
+            }
+        }
+        return ArrayList()
+    }
 }

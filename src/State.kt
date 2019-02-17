@@ -1,7 +1,11 @@
 class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) {
 
+    var id: Int
+
     companion object {
-        var iterations = 0
+        val frontier = HashMap<Int, State>()
+        val explored = HashMap<Int, State>()
+        var solution = ArrayList<State>()
     }
 
     val pathCost: Int = if (father != null) father.pathCost + 1 else 0
@@ -9,9 +13,12 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
     val actions = returnActions()
 
     init {
-        iterations++
-        println(pathCost)
+        id = if (father != null) father.id + 1 else 0
+        println("id: $id")
         println("next: ${next?.first}, ${next?.second}")
+        println("pathCost: $pathCost")
+        if (pathCost < 1)
+            frontier.put(this.id, this)
     }
 
     fun isSolvable(): Boolean {
@@ -66,7 +73,8 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
                 if (value[next.first] != 0 && index != next.second)
                     array[value[next.first] - 1] = 0
             }
-        } else return ArrayList()
+        }
+        else return ArrayList()
         for (i in array) print(i)
         println()
         return array
@@ -115,10 +123,13 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
         return false
     }
 
-    fun solve(): ArrayList<State> {
+    fun solve() {
         if (isSolvable()) {
+            if (solution.size > 0) return
             if (goalTest()) {
-            } else {
+                insertToSolution()
+            }
+            else {
                 val children = returnChildren()
                 if (children.size > 0) {
                     children.sortBy { it.heuristic() }
@@ -128,14 +139,20 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
                 }
             }
         }
-        return ArrayList()
+        return
+    }
+
+    fun insertToSolution() {
+        solution.add(this)
+        if (this.id != 0)
+            father!!.insertToSolution()
     }
 
     fun returnChildren(): ArrayList<State> {
         val children: ArrayList<State> = ArrayList()
         if (next != null) {
             for (action in actions) {
-                if  (action != 0){
+                if (action != 0) {
 
                     val newGrid = grid.copyOf()
                     newGrid[next.second][next.first] = action
@@ -143,6 +160,7 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
                     children.add(state)
                     println()
                     println("antes de agregar a children:\n$children")
+                    println("Este es hijo de: ${this.id}")
                 }
             }
             return children
