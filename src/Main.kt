@@ -18,10 +18,9 @@ fun main() {
     val sudoku = Sudoku(squares, initialString)
     if (sudoku.isSolvable()) {
         val solution = sudoku.solve()
-        var counter = 0
         if (solution.size > 0) {
-            for (state in solution)
-                println("Step $counter: \n\n$state")
+            for (i in 1..solution.size)
+                println("Step ${i-1}: \n\n${solution[solution.size - i]}")
         }
         else println("The algorithm didn't find a solution for the sudoku.")
     }

@@ -1,11 +1,12 @@
+import kotlin.math.sqrt
+
 class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) {
 
-    var id: Int
+    val id: Int
 
     companion object {
-        val frontier = HashMap<Int, State>()
-        val explored = HashMap<Int, State>()
         var solution = ArrayList<State>()
+        var totalStates = 0
     }
 
     val pathCost: Int = if (father != null) father.pathCost + 1 else 0
@@ -13,12 +14,13 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
     val actions = returnActions()
 
     init {
-        id = if (father != null) father.id + 1 else 0
+        id = totalStates
+        totalStates++
+        /*println("fatherId: ${father?.id}")
         println("id: $id")
-        println("next: ${next?.first}, ${next?.second}")
+        println("next: ${next?.second}, ${next?.first}")
         println("pathCost: $pathCost")
-        if (pathCost < 1)
-            frontier.put(this.id, this)
+        println()*/
     }
 
     fun isSolvable(): Boolean {
@@ -74,9 +76,9 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
                     array[value[next.first] - 1] = 0
             }
         }
-        else return ArrayList()
+        else return ArrayList()/*
         for (i in array) print(i)
-        println()
+        println()*/
         return array
     }
 
@@ -110,36 +112,45 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
     }
 
     private fun checkConflict(num: Int, x: Int, y: Int): Boolean {
+        /*println("num: $num")
+        println("x: $x")
+        println("y: $y")*/
+        //check the row
         val row = grid[y]
         for ((index, value) in row.withIndex()) {
             if (value == num && index != x)
                 return true
         }
 
+        //check the column
         for ((index, array) in grid.withIndex()) {
             if (array[x] == num && index != y)
                 return true
         }
-        return false
-    }
 
-    fun solve() {
-        if (isSolvable()) {
-            if (solution.size > 0) return
-            if (goalTest()) {
-                insertToSolution()
-            }
-            else {
-                val children = returnChildren()
-                if (children.size > 0) {
-                    children.sortBy { it.heuristic() }
-                    for (child in children) {
-                        child.solve()
-                    }
+        //check the box
+        val boxSize = sqrt(grid.size.toDouble()).toInt()
+        //use division to get the box's index and then use box size
+        val boxStartX = x / boxSize * boxSize
+        val boxStartY = y / boxSize * boxSize
+
+        /*println("boxSize: $boxSize")
+        println("boxStartX: $boxStartX")
+        println("boxStartY: $boxStartY")
+*/
+        for (i in boxStartY until boxStartY + boxSize) {
+            for (j in boxStartX until boxStartX + boxSize) {/*
+                println("i: $i")
+                println("j: $j")*/
+                if (i != y || j != x) {
+                    //println("$i != $y && $j != $x")
+                    if (grid[i][j] == num)
+                        return true
                 }
             }
         }
-        return
+
+        return false
     }
 
     fun insertToSolution() {
@@ -153,15 +164,21 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
         if (next != null) {
             for (action in actions) {
                 if (action != 0) {
-
-                    val newGrid = grid.copyOf()
+                    val newGrid = Array(grid.size) { IntArray(grid.size) }
+                    for ((index, array) in grid.withIndex()) {
+                        val row = IntArray(array.size)
+                        for ((indice, value) in array.withIndex()) {
+                            row[indice] = value
+                        }
+                        newGrid[index] = row
+                    }
                     newGrid[next.second][next.first] = action
                     val state = State(newGrid, this, action)
-                    children.add(state)
+                    children.add(state)/*
                     println()
                     println("antes de agregar a children:\n$children")
                     println("Este es hijo de: ${this.id}")
-                }
+                */}
             }
             return children
         }
