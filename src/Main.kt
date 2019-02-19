@@ -6,15 +6,15 @@ fun main() {
         println("Unvalid option. Select either 1 or 2: ")
         op = readLine()
     }
+    val squares = if (op == "1") 2 else 3
 
     println("Now, please insert the string for the sudoku: ")
     var initialString = readLine()
-    while (!initialString!!.matches("[0-9.]+".toRegex())) {
-        println("Unvalid string. Use only numbers and '.' for spaces: ")
+    while (!initialString!!.matches("[0-9.]+".toRegex()) || initialString.length < Math.pow(squares.toDouble(), 4.0)) {
+        println("Unvalid string. Use only numbers and '.' for spaces. Also, the string has to be size ${Math.pow(squares.toDouble(), 2.0).toInt()}: ")
         initialString = readLine()
     }
 
-    val squares = if (op == "1") 2 else 3
     val sudoku = Sudoku(squares, initialString)
     if (sudoku.isSolvable()) {
         val solution = sudoku.solve()

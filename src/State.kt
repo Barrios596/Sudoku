@@ -105,7 +105,7 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
         for ((indice, array) in grid.withIndex()) {
             out += '|'
             for ((index, i) in array.withIndex()) {
-                out += "$i"
+                out += if (i == 0) " " else "$i"
                 if (index != 0)
                     if ((index + 1) % boxSize == 0) out += "|"
             }
