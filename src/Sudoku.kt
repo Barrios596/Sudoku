@@ -31,12 +31,6 @@ class Sudoku(squares: Int, initialString: String) {
         var count = 0
         while (frontier.size > 0) {
             val sortedFrontier = frontier.toList().sortedBy { it.second.heuristic() + it.second.pathCost }
-            //println("sorted frontier:")
-            /*for (state in sortedFrontier){
-                print("${state.second.id},")
-            }*/
-            //println()
-            //println()
             val selected = sortedFrontier[0].second
             explored[selected.id] = selected
 
@@ -47,9 +41,7 @@ class Sudoku(squares: Int, initialString: String) {
             else {
                 for (child in selected.returnChildren()) {
                     if (!explored.containsKey(child.id)) {
-                        /*println(child.toString())
-                        println()
-                        */if (child.returnChildren().size > 0 || child.goalTest()){
+                        if (child.returnChildren().size > 0 || child.goalTest()){
                             frontier[child.id] = child
                         }
                     }

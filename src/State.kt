@@ -11,16 +11,11 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
 
     val pathCost: Int = if (father != null) father.pathCost + 1 else 0
     val next = nextSpace()
-    val actions = returnActions()
+    val actions = returnActions(next)
 
     init {
         id = totalStates
         totalStates++
-        /*println("fatherId: ${father?.id}")
-        println("id: $id")
-        println("next: ${next?.second}, ${next?.first}")
-        println("pathCost: $pathCost")
-        println()*/
     }
 
     fun isSolvable(): Boolean {
@@ -44,60 +39,84 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
     }
 
     private fun nextSpace(): Pair<Int, Int>? {
-        val x: Int
-        val y: Int
+        val options = ArrayList<Pair<Int, Pair<Int, Int>>>()
         val length = grid.size
 
         for (array in grid) {
             for (i in 0 until length) {
                 if (array[i] == 0) {
-                    y = grid.indexOf(array)
-                    x = i
-                    return Pair(x, y)
+                    val position = Pair(i, grid.indexOf(array))
+                    options.add(Pair(returnActions(position).size, position))
                 }
             }
         }
-        return null
+        val sortedOptions = options.sortedWith(compareBy { it.first })
+        return if (sortedOptions.isNotEmpty()) sortedOptions[0].second else null
     }
 
-    private fun returnActions(): ArrayList<Int> {
+    private fun returnActions(position: Pair<Int, Int>?): ArrayList<Int> {
         val array = ArrayList<Int>()
+        val out = ArrayList<Int>()
         for (i in 0 until grid.size) array.add(i + 1)
-        if (next != null) {
-            val row = grid[next.second]
+
+        if (position != null) {
+
+            //check the box
+            val boxSize = sqrt(grid.size.toDouble()).toInt()
+            //use division to get the box's index (truncate) and then use box size
+            val boxStartX = position.first / boxSize * boxSize
+            val boxStartY = position.second / boxSize * boxSize
+
+            for (i in boxStartY until boxStartY + boxSize) {
+                for (j in boxStartX until boxStartX + boxSize) {
+                    if (i != position.second || j != position.first) {
+                        if (grid[i][j] != 0)
+                            array[grid[i][j] - 1] = 0
+                    }
+                }
+            }
+
+            val row = grid[position.second]
 
             for ((index, value) in row.withIndex()) {
-                if (value != 0 && index != next.first)
+                if (value != 0 && index != position.first)
                     array[value - 1] = 0
             }
 
             for ((index, value) in grid.withIndex()) {
-                if (value[next.first] != 0 && index != next.second)
-                    array[value[next.first] - 1] = 0
+                if (value[position.first] != 0 && index != position.second)
+                    array[value[position.first] - 1] = 0
+            }
+            for (action in array) {
+                if (action != 0) out.add(action)
             }
         }
-        else return ArrayList()/*
-        for (i in array) print(i)
-        println()*/
-        return array
+        else return ArrayList()
+        return out
     }
 
     override fun toString(): String {
+        val boxSize = sqrt(grid.size.toFloat()).toInt()
         var out = ""
-        for (i in 0 until (grid.size * 2 + 1)) {
+        for (i in 0 until (grid.size + boxSize + 1)) {
             out += '-'
         }
         out += '\n'
-        for (array in grid) {
+        for ((indice, array) in grid.withIndex()) {
             out += '|'
-            for (i in array) {
-                out += "$i|"
+            for ((index, i) in array.withIndex()) {
+                out += "$i"
+                if (index != 0)
+                    if ((index + 1) % boxSize == 0) out += "|"
             }
             out += '\n'
-            for (i in 0 until (grid.size * 2 + 1)) {
-                out += '-'
-            }
-            out += '\n'
+            if (indice != 0)
+                if ((indice + 1) % boxSize == 0) {
+                    for (i in 0 until (grid.size + boxSize + 1)) {
+                        out += '-'
+                    }
+                    out += '\n'
+                }
         }
         return out
     }
@@ -112,9 +131,6 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
     }
 
     private fun checkConflict(num: Int, x: Int, y: Int): Boolean {
-        /*println("num: $num")
-        println("x: $x")
-        println("y: $y")*/
         //check the row
         val row = grid[y]
         for ((index, value) in row.withIndex()) {
@@ -134,16 +150,9 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
         val boxStartX = x / boxSize * boxSize
         val boxStartY = y / boxSize * boxSize
 
-        /*println("boxSize: $boxSize")
-        println("boxStartX: $boxStartX")
-        println("boxStartY: $boxStartY")
-*/
         for (i in boxStartY until boxStartY + boxSize) {
-            for (j in boxStartX until boxStartX + boxSize) {/*
-                println("i: $i")
-                println("j: $j")*/
+            for (j in boxStartX until boxStartX + boxSize) {
                 if (i != y || j != x) {
-                    //println("$i != $y && $j != $x")
                     if (grid[i][j] == num)
                         return true
                 }
@@ -174,11 +183,8 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
                     }
                     newGrid[next.second][next.first] = action
                     val state = State(newGrid, this, action)
-                    children.add(state)/*
-                    println()
-                    println("antes de agregar a children:\n$children")
-                    println("Este es hijo de: ${this.id}")
-                */}
+                    children.add(state)
+                }
             }
             return children
         }
