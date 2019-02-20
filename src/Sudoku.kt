@@ -36,7 +36,9 @@ class Sudoku(squares: Int, initialString: String) {
 
             if (selected.goalTest()) {
                 selected.insertToSolution()
-                return State.solution
+                val solution = State.solution
+                selected.resetStaticVariables()
+                return solution
             }
             else {
                 for (child in selected.returnChildren()) {

@@ -18,6 +18,11 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
         totalStates++
     }
 
+    fun resetStaticVariables() {
+        solution = ArrayList<State>()
+        totalStates = 0
+    }
+
     fun isSolvable(): Boolean {
         for (array in grid) {
             for (i in 0 until array.size) {
@@ -190,4 +195,7 @@ class State(val grid: Array<IntArray>, val father: State?, val prevAction: Int) 
         }
         return ArrayList()
     }
+
+    //fun returnGrid(): Array<IntArray> = grid
+
 }
